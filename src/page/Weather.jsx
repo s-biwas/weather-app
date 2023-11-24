@@ -5,6 +5,7 @@ const Weather = () => {
   const [weather, setWeather] = useState({});
   const [currentLocalDate, setCurrentLocalDate] = useState("");
   const [backgroundImage, setBackgroundImage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const api = {
     key: "57d01a64f1a98c240ed38a3ae5a9b96d",
@@ -13,6 +14,7 @@ const Weather = () => {
 
   const search = (evt) => {
     if (evt.key === "Enter") {
+      setLoading(true);
       fetch(`${api.base}weather?q=${query}&units=metric&APPID=${api.key}`)
         .then((res) => res.json())
         .then((result) => {
@@ -26,6 +28,9 @@ const Weather = () => {
           setWeather({});
           setCurrentLocalDate("");
           setBackgroundImage("");
+        })
+        .finally(() => {
+          setLoading(false);
         });
     }
   };
@@ -71,22 +76,28 @@ const Weather = () => {
           onChange={(e) => setQuery(e.target.value)}
           onKeyPress={search}
         />
-        {weather.main && (
-          <div className="text-center mt-6">
-            <div className="text-3xl font-bold mb-2">
-              {weather.name}, {weather.sys.country}
-            </div>
-            {currentLocalDate && (
-              <div className="text-lg mb-4">{currentLocalDate}</div>
+        {loading ? ( // Render loading UI when loading is true
+          <div className="text-center mt-6 text-2xl text-white">Loading...</div>
+        ) : (
+          <>
+            {weather.main && (
+              <div className="text-center mt-6">
+                <div className="text-3xl font-bold mb-2">
+                  {weather.name}, {weather.sys.country}
+                </div>
+                {currentLocalDate && (
+                  <div className="text-lg mb-4">{currentLocalDate}</div>
+                )}
+                <div className="text-6xl font-bold">
+                  {Math.round(weather.main.temp)}°C
+                </div>
+                <div className="text-lg">{weather.weather[0].description}</div>
+              </div>
             )}
-            <div className="text-6xl font-bold">
-              {Math.round(weather.main.temp)}°C
-            </div>
-            <div className="text-lg">{weather.weather[0].description}</div>
-          </div>
-        )}
-        {weather.message && (
-          <div className="mt-6 text-red-500 text-lg">{weather.message}</div>
+            {weather.message && (
+              <div className="mt-6 text-red-500 text-lg">{weather.message}</div>
+            )}
+          </>
         )}
       </div>
     </div>
